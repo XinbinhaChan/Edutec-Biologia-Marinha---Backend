@@ -67,7 +67,9 @@ app.post("/login", (request, response) => {
         if(user.senha === data[0].password) {
             const email = user.email;
             const id = data[0].id
-            const token = jwt.sign({id, email}, SECRET_KEY, { expiresIn: "1h"})
+            const name = data[0].name
+
+            const token = jwt.sign({id, email, name}, SECRET_KEY, { expiresIn: "1h"})
             response.json({ token, ok: true })
             return
         }
@@ -79,7 +81,7 @@ app.post("/login", (request, response) => {
 
 app.get("/verify", (request, response) => {
     const token = request.headers.authorization;
-    jwt.verify(token, SECRET_KEY, (error) => {
+    jwt.verify(token, SECRET_KEY, (error, decoded) => {
         if(error) {
             response.json({message: "Token inválido. Efetue o login novamente."})
             return
@@ -88,6 +90,12 @@ app.get("/verify", (request, response) => {
         response.json({ok: true})
         
     });
+})
+
+app.get("/getname", (request, response) => {
+    const token = request.headers.authorization;
+    const decoded = jwt.verify(token, SECRET_KEY)
+    response.json({name: decoded.name})
 })
 
 app.listen(3000, () => {
